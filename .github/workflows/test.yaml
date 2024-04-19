@@ -40,20 +40,17 @@ jobs:
           env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_REGION: ${{ secrets.AWS_REGION }}
+            AWS_REGION: ${{ secrets.AWS_REGION }}            
             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-            ECR_REPOSITORY: ${{secrets.AWS_ECR_REPO}}
-            IMAGE_TAG: latest
           with:
             script: |
               aws configure set aws_access_key_id > echo $AWS_ACCESS_KEY_ID
               aws configure set aws_secret_access_key > echo $AWS_SECRET_ACCESS_KEY
               aws configure set default.region > echo $AWS_REGION
               aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $ECR_REGISTRY
-              sudo docker rm -f `sudo docker ps -q` 
-              sudo docker run -d -p 3000:3000 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+              sudo docker-compose down && docker-compose up -d               
             host: ${{ secrets.PUB_IP }}
             username: ubuntu
             key: ${{ secrets.KEY }}
             port: 22
-            envs: AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY,IMAGE_TAG h        
+            envs: AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_REGISTRY        
